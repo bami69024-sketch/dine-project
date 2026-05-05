@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # আপনার নতুন দেওয়া টোকেন এবং চ্যাট আইডি এখানে যুক্ত করা হয়েছে
 BOT_TOKEN = "8307189262:AAF-D6rvhKzuzFo3vCJam4R_hKgNvOCv6uI"
-CHAT_ID = "8307189262"
+CHAT_ID = "7194661370"
 
 @app.route('/')
 def index():
